@@ -32,13 +32,14 @@ Toolchain от linaro - https://www.linaro.org/downloads/  gcc-linaro-7.5.0-2019
 ---------------- сборка sqlite
 
 https://www.sqlite.org/download.html
+<code>
 tar -xzvf sqlite-autoconf-3320300.tar.gz
 cd sqlite-autoconf-3320300/
 ./configure --host=arm-linux --prefix=/home/artp/Segnetics/libs CC=/opt/linaro/arm-linux-gnueabihf/bin/
 make
 ls -l .libs
 make install
-
+</code>
 
 Здоровая критика приветствуется.
 
