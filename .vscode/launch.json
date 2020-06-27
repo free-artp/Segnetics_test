@@ -1,0 +1,26 @@
+{
+	"version": "0.2.0",
+	"configurations": [
+		{
+			"name": "(gdb) Launch",
+			"type": "cppdbg",
+			"request": "launch",
+//			"preLaunchTask": "Build",
+//			"preLaunchTask": "gdbserver Start",
+			"program": "./${workspaceFolderBasename}",
+			"args" : [],
+			"stopAtEntry": true,
+			"cwd": "${workspaceRoot}",
+			"environment": [],
+			"externalConsole": true,
+			"MIMode": "gdb",
+			"miDebuggerServerAddress": "192.168.1.213:1234",
+			"miDebuggerPath": "/opt/linaro/arm-linux-gnueabihf/bin/arm-linux-gnueabihf-gdb",
+            "logging": {
+                "trace": true,
+                "traceResponse": true,
+                "engineLogging": true
+            }
+		}
+	]
+}

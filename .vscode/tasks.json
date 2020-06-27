@@ -1,0 +1,72 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Build",
+			"type": "shell",
+			"command": "/opt/linaro/arm-linux-gnueabihf/bin/arm-linux-gnueabihf-gcc",
+			"args" : [
+                "-march=armv7-a",
+				"-mtune=cortex-a8",
+				"-mfpu=neon",
+				"-mfloat-abi=hard",
+				"-O0",
+				"-g",
+				"-Wall",
+				"-W",
+				"-fPIE",
+//				"${file}",
+				"src/*.c",
+				"-I../libs/include",
+//				"-o", "${fileDirname}/${fileBasenameNoExtension}",
+				"-o", "${workspaceFolder}/obj/${workspaceFolderBasename}",
+				"-L../libs/lib", "-lsqlite3"
+			],
+			"options": {
+				},
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			},
+			"problemMatcher": [
+				"$gcc"
+			]
+		},
+		{
+			"label": "install",
+			"type": "shell",
+			"command":"/usr/bin/scp",
+			"args": [
+				"${workspaceFolder}/obj/${workspaceFolderBasename}",
+				"root@192.168.1.213:${workspaceFolderBasename}"
+			],
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			},
+
+		},
+		{
+			"label": "gdbserver Start",
+			"type": "shell",
+			"command": "/usr/bin/ssh",
+			"args": [
+				"root@192.168.1.213",
+				"/usr/bin/gdbserver :1234 ${workspaceFolderBasename}"
+			],
+			"presentation": {
+				"reveal": "never"
+			},
+		 
+		},
+		{
+			"label": "gdbserver Stop",
+			"type": "shell",
+			"command": "/usr/bin/ssh",
+			"args": [
+				"root@192.168.1.213",
+				"killall gdbserver"
+			]
+		}
+	]
+}
