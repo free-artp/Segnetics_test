@@ -10,6 +10,8 @@ typedef struct _mem_var_type {
     unsigned int uid;
     unsigned int offset;
     void *value;
+    void *value_old;
+    void (*callback)();
 } mem_var;
 
 typedef enum _memory_vars_type {

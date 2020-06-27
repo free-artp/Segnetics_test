@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <sqlite3.h>
 #include <string.h>
+#include <syslog.h>
 #include <pthread.h>
 
 #include <sys/select.h>
@@ -10,6 +11,7 @@
 
 #include <sys/ipc.h>
 #include <sys/shm.h>
+
 
 //==========================================
 
@@ -79,7 +81,8 @@ static void myunlock(pthread_mutex_t *mutex)
   if(*cnt > 0) (*cnt)--;
 }
 
-//==================================
+
+//==============================
 int shm_write(unsigned long offset, const void *buf, int len)
 {
   void *ptr;
@@ -109,59 +112,6 @@ int shm_read(unsigned long offset, void *buf, int len)
 
 //==================================
 
-void shm_init(const char *shmname, unsigned long Size){
-    struct shmid_ds buf;
-    FILE *fp;
-    int file_existed;
-
-    status  = OK;
-    name = malloc(strlen(shmname)+1);
-    memset(name, 0, strlen(shmname)+1 );
-    strcpy(name,shmname);
-
-    size    = Size + sizeof(*mutex);
-
-    // create file
-    file_existed = 1;
-    fp = fopen(name,"r");
-    if(fp == NULL)
-    {
-        file_existed = 0;
-        fp = fopen(name,"w");
-        if(fp == NULL)     
-        {
-            int ret; 
-            char buf[1024];
-            sprintf(buf,"could not write shm=%s\n",shmname);
-            ret = shm_write(1,buf,strlen(buf));
-            if(ret < 0) exit(-1);
-            sprintf(buf,"you have to run this program as root !!!\n");
-            ret = shm_write(1,buf,strlen(buf));
-            if(ret < 0) exit(-1);
-            status=ERROR_FILE;
-            exit(-1);
-        }
-    }
-    fclose(fp);
-
-    shmkey  = ftok(name, 'b');
-
-    id  = shmget(shmkey, size, 0666 | IPC_CREAT);
-    if(id < 0)           { status=ERROR_SHMGET; return; }
-
-    base_adr = (char *) shmat(id,NULL,0);
-    if(base_adr == NULL) { status=ERROR_SHMAT;  return; }
-
-    if(shmctl(id, IPC_STAT, &buf) != 0) { status=ERROR_SHMCTL; return; };
-
-    mutex     = (pthread_mutex_t *) base_adr;
-    user_adr  = base_adr + sizeof(*mutex);
-
-    if(file_existed == 0) myinit(mutex);
-
-}
-
-//==============================
 int shm_readInt(unsigned long offset, int index)
 {
   int val;
@@ -236,9 +186,67 @@ void *shm_getUserAdr()
 
 //==================================
 
+void shm_init(const char *shmname, unsigned long Size){
+    struct shmid_ds buf;
+    FILE *fp;
+    int file_existed;
+
+    status  = OK;
+    name = malloc(strlen(shmname)+1);
+    memset(name, 0, strlen(shmname)+1 );
+    strcpy(name,shmname);
+
+    size    = Size + sizeof(*mutex);
+
+    // create file
+    file_existed = 1;
+    fp = fopen(name,"r");
+    if(fp == NULL)
+    {
+        file_existed = 0;
+        fp = fopen(name,"w");
+        if(fp == NULL)     
+        {
+            int ret; 
+            char buf[1024];
+            sprintf(buf,"could not write shm=%s\n",shmname);
+            ret = shm_write(1,buf,strlen(buf));
+            if(ret < 0) exit(-1);
+            sprintf(buf,"you have to run this program as root !!!\n");
+            ret = shm_write(1,buf,strlen(buf));
+            if(ret < 0) exit(-1);
+            status=ERROR_FILE;
+            exit(-1);
+        }
+    }
+    fclose(fp);
+
+    shmkey  = ftok(name, 'b');
+
+    id  = shmget(shmkey, size, 0666 | IPC_CREAT);
+    if(id < 0)           { status=ERROR_SHMGET; return; }
+
+    base_adr = (char *) shmat(id,NULL,0);
+    if(base_adr == NULL) { status=ERROR_SHMAT;  return; }
+
+    if(shmctl(id, IPC_STAT, &buf) != 0) { status=ERROR_SHMCTL; return; };
+
+    mutex     = (pthread_mutex_t *) base_adr;
+    user_adr  = base_adr + sizeof(*mutex);
+
+    if(file_existed == 0)
+      myinit(mutex);
+
+}
+//==================================
+
 void shared_memory_init( int size ) {
 
     shm_init( "/dev/shm/wsi", size);
-    printf("size: %d status: %d\n", size, status);
+    if ( status != OK ) {
+      syslog(LOG_INFO,"could not init shared memory. status: %d", status);
+      exit(1);
+    }
+    syslog(LOG_INFO, "shared memory inited size: %d status: %d", size, status);
 }
 

@@ -1,16 +1,11 @@
-# export PATH=/opt/rpi-tools/arm-bcm2708/arm-rpi-4.9.3-linux-gnueabihf/bin:$PATH
-
-# /opt/rpi-tools/arm-bcm2708/arm-rpi-4.9.3-linux-gnueabihf/arm-linux-gnueabihf/sysroot
-
-# DEFINES=-I../libs/include
+# export PATH=/opt/linaro/arm-linux-gnueabihf/bin:$PATH
+# /opt/linaro/sysroot
 
 ARCH=armv7-a
 CROSS_COMPILE=arm-linux-gnueabihf
-#CROSS_COMPILE=
-#SYSROOT=/opt/linaro/sysroot-glibc-linaro-2.25-2019.12-arm-linux-gnueabihf/
 
 TARGET=test2
-SOURCES = test.c shmem.c vars.c
+SOURCES = main.c shmem.c vars.c config.c
 
 DEFINES=
 INCLUDES = -I../libs/include -Isrc
@@ -36,11 +31,7 @@ CPP=$(CROSS_COMPILE)-cpp
 OBJCOPY=$(CROSS_COMPILE)-objcopy
 
 CCFLAGS =  -g -march=armv7-a -mtune=cortex-a8 -mfpu=neon -mfloat-abi=hard -O0 -Wall -W -fPIE $(INCLUDES) $(DEFINES)
-LDFLAGS = -L../libs/lib -lsqlite3
-
-#CCFLAGS = -O0 -g -Wall
-#LDFLAGS = -L$(TOOLCHAIN)/arm-linux-gnueabihf/sysroot/lib/ -lpthread -lwiringPi
-#LDFLAGS = -L$(MY_SYSROOT)/lib/arm-linux-gnueabihf -L$(MY_SYSROOT)/usr/lib
+LDFLAGS = -L../libs/lib -lsqlite3 -lpthread
 
 all : $(_TARGET)
 

@@ -21,7 +21,7 @@
 				"-I${workspaceFolder}/src",
 //				"-o", "${fileDirname}/${fileBasenameNoExtension}",
 				"-o", "${workspaceFolder}/obj/${workspaceFolderBasename}",
-				"-L../libs/lib", "-lsqlite3"
+				"-L../libs/lib", "-lsqlite3", "-lpthread"
 			],
 			"options": {
 				},

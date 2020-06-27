@@ -7,7 +7,7 @@
 			"request": "launch",
 //			"preLaunchTask": "Build",
 //			"preLaunchTask": "gdbserver Start",
-			"program": "./${workspaceFolderBasename}",
+			"program": "./obj/${workspaceFolderBasename}",
 			"args" : [],
 			"stopAtEntry": true,
 			"cwd": "${workspaceRoot}",
