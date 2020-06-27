@@ -19,14 +19,17 @@
 
 ## toolchain
 
-Toolchain от linaro - https://www.linaro.org/downloads/  gcc-linaro-7.5.0-2019.12-x86_64_arm-linux-gnueabihf . У меня лежит в /opt/linaro и, чтобы иметь возможность комбинировать версии, сделаны симлинки:
-    arm-linux-gnueabihf -> gcc-linaro-7.5.0-2019.12-x86_64_arm-linux-gnueabihf
-    runtime -> runtime-gcc-linaro-7.5.0-2019.12-arm-linux-gnueabihf
-    sysroot -> sysroot-glibc-linaro-2.25-2019.12-arm-linux-gnueabihf
+Toolchain от [linaro](https://www.linaro.org/downloads/)  gcc-linaro-7.5.0-2019.12-x86_64_arm-linux-gnueabihf . У меня лежит в /opt/linaro и, чтобы иметь возможность комбинировать версии, сделаны симлинки:
+```bash
+    ln -s gcc-linaro-7.5.0-2019.12-x86_64_arm-linux-gnueabihf arm-linux-gnueabihf
+    ln -s runtime-gcc-linaro-7.5.0-2019.12-arm-linux-gnueabihf runtime
+    ln -s sysroot-glibc-linaro-2.25-2019.12-arm-linux-gnueabihf sysroot
+```
 
 В этом тулчайне нет libsqlite3. Соответственно, собрал его тем же тулчайном и положил его этажом выше проекта. При сборке (как и при использовании Makefile) не забывать переопределять свой PATH:
+```bash
     export PATH=/opt/linaro/arm-linux-gnueabihf/bin:$PATH
-
+```
 При работе в VSCode прописать во всех трех файлах, в каталоге .vscode правильные абсолютные пути до тулчайна.
 
 ## сборка sqlite
@@ -40,6 +43,7 @@ make
 ls -l .libs
 make install
 ```
+Префикс, естественно, заменить на свой.
 
 Здоровая критика приветствуется.
 
