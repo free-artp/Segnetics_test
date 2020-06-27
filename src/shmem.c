@@ -11,71 +11,6 @@
 #include <sys/ipc.h>
 #include <sys/shm.h>
 
-sqlite3 *db;
-//====================================
-int db_init(const char * name){
-
-    int rc = sqlite3_open(name, &db);
-    if (rc != SQLITE_OK) {
-        fprintf(stderr, "Cannot open database: %s\n", 
-        sqlite3_errmsg(db));
-        sqlite3_close(db);
-        return 0;
-    }
-    return 1;
-}
-void db_close(void){
-    sqlite3_close(db);
-}
-//====================================
-int get_shmem_size(){
-//    char *err_msg = 0;
-    
-    sqlite3_stmt *res;
-    unsigned int uid;
-    unsigned int max_offset, var_size;
-
-        
-    int rc = sqlite3_prepare_v2(db, "SELECT max(value) FROM variables_0 WHERE name = 'c_offset'", -1, &res, 0);
-    if (rc != SQLITE_OK) {
-        fprintf(stderr, "Failed to fetch data: %s\n", sqlite3_errmsg(db));
-        sqlite3_close(db);
-        return 0;
-    }    
-  
-    int step = sqlite3_step(res);
-
-    if (step == SQLITE_ROW) {
-        const unsigned char * tmp = sqlite3_column_text(res, 0);
-        max_offset = atoi((const char *)tmp);
-        sqlite3_reset(res);
-        rc = sqlite3_prepare_v2(db,"select uid from variables_0 where name='c_offset' and value=?",-1,&res,0);
-        if(rc == SQLITE_OK) {
-            rc = sqlite3_bind_int(res, 1, max_offset);
-            step = sqlite3_step(res);
-            if (step == SQLITE_ROW) {
-                uid = sqlite3_column_int(res,0);
-                fprintf(stderr, "%d\n", uid);
-                sqlite3_reset(res);
-                rc = sqlite3_prepare_v2(db,"select value from variables_0 where uid=? and name='size'",-1,&res,0);
-                if (rc == SQLITE_OK){
-                    rc = sqlite3_bind_int(res, 1, uid);
-                    step = sqlite3_step(res);
-                    if (step == SQLITE_ROW) {
-                        var_size = sqlite3_column_int(res,0);
-                        fprintf(stderr, "%d\n", var_size);
-                        sqlite3_reset(res);
-                    }
-                }
-            }
-        }
-    } 
-
-    sqlite3_finalize(res);
-
-    return max_offset + var_size;
-}
-
 //==========================================
 
 int id;
@@ -301,95 +236,9 @@ void *shm_getUserAdr()
 
 //==================================
 
-void shared_memory_init( void ) {
-    int size = 0;
-    size = get_shmem_size();
-    shm_init( "/dev/shm/wsi", size);
+void shared_memory_init( int size ) {
 
+    shm_init( "/dev/shm/wsi", size);
     printf("size: %d status: %d\n", size, status);
 }
 
-#define NAME_LEN 10
-typedef struct _mem_var_type {
-    char name[NAME_LEN];
-    char typ;
-    int size;
-    unsigned int uid;
-    unsigned int offset;
-} mem_var;
-
-typedef enum _memory_vars_type {
-    MY_CNT = 0,
-    MY_SEC
-} MEMORY_VARS;
-
-mem_var Vars[] = 
-{
-    {
-        .name = "my_cnt"
-    },
-    {
-        .name = "my_sec"
-    }
-};
-
-void vars_init(void){
-    int i,l;
-    sqlite3_stmt *res;
-
-    
-    if (db_init("/projects/settings.sqlite")) {
-
-        shared_memory_init();
-
-        l = sizeof(Vars) / sizeof(mem_var) - 1;
-        for (i = 0; i<=l; ++i) {
-            Vars[i].size = -1;
-
-            int rc = sqlite3_prepare_v2(db, "SELECT uid FROM variables_0 WHERE name = 'name' and value = ?", -1, &res, 0);
-            if(rc == SQLITE_OK) {
-                rc = sqlite3_bind_text(res, 1, Vars[i].name, strlen(Vars[i].name), NULL);
-                int step = sqlite3_step(res);
-                if (step == SQLITE_ROW) {
-                    Vars[i].uid = sqlite3_column_int(res,0);
-
-                    rc = sqlite3_prepare_v2(db, "SELECT value FROM variables_0 WHERE name = 'c_offset' and uid = ?", -1, &res, 0);
-                    if(rc == SQLITE_OK){
-                        rc = sqlite3_bind_int(res, 1, Vars[i].uid);
-                        step = sqlite3_step(res);
-                        if (step == SQLITE_ROW) {
-                            Vars[i].offset = sqlite3_column_int(res,0);
-
-                            rc = sqlite3_prepare_v2(db, "SELECT value FROM variables_0 WHERE name = 'size' and uid = ?", -1, &res, 0);
-                            if(rc == SQLITE_OK){
-                                rc = sqlite3_bind_int(res, 1, Vars[i].uid);
-                                step = sqlite3_step(res);
-                                if (step == SQLITE_ROW) {
-                                    Vars[i].size = sqlite3_column_int(res,0);
-
-                                    rc = sqlite3_prepare_v2(db, "SELECT value FROM variables_0 WHERE name = 'type' and uid = ?", -1, &res, 0);
-                                    if(rc == SQLITE_OK){
-                                        rc = sqlite3_bind_int(res, 1, Vars[i].uid);
-                                        step = sqlite3_step(res);
-                                        if (step == SQLITE_ROW) {
-                                            const unsigned char * t = sqlite3_column_text(res,0);
-                                            if (strncmp("int", (const char *)t, strlen((const char *)t)) == 0) Vars[i].typ ='i';
-                                            if (strncmp("long", (const char *)t, strlen((const char *)t)) == 0) Vars[i].typ ='l';
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            printf("%s %d %d %d %c\n",Vars[i].name, Vars[i].uid, Vars[i].offset, Vars[i].size, Vars[i].typ);
-            if (Vars[i].typ == 'i') {
-              unsigned short v = -1;
-              shm_read(Vars[i].offset, &v, Vars[i].size);
-              printf("value: %0x %d %u\n", v, v, v);
-            }
-        }
-        db_close();
-    }
-}

@@ -9,6 +9,7 @@
                 "/opt/linaro/gcc-linaro-7.5.0-2019.12-x86_64_arm-linux-gnueabihf/bin/../lib/gcc/arm-linux-gnueabihf/7.5.0/../../../../arm-linux-gnueabihf/include/**",
                 "/opt/linaro/gcc-linaro-7.5.0-2019.12-x86_64_arm-linux-gnueabihf/bin/../arm-linux-gnueabihf/libc/usr/include/**",        
                 "${workspaceRoot}/../libs/include/**",
+                "${workspaceRoot}/src/**",
                 "${workspaceRoot}/**"
             ],
             "defines": [

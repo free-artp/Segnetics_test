@@ -9,11 +9,11 @@ CROSS_COMPILE=arm-linux-gnueabihf
 #CROSS_COMPILE=
 #SYSROOT=/opt/linaro/sysroot-glibc-linaro-2.25-2019.12-arm-linux-gnueabihf/
 
-TARGET=test
-SOURCES = test.c shmem.c
+TARGET=test2
+SOURCES = test.c shmem.c vars.c
 
 DEFINES=
-INCLUDES = ../libs/include
+INCLUDES = -I../libs/include -Isrc
 
 ODIR = obj
 SDIR = src
@@ -35,7 +35,7 @@ AR=$(CROSS_COMPILE)-ar
 CPP=$(CROSS_COMPILE)-cpp
 OBJCOPY=$(CROSS_COMPILE)-objcopy
 
-CCFLAGS =  -g -march=armv7-a -mtune=cortex-a8 -mfpu=neon -mfloat-abi=hard -O0 -Wall -W -fPIE -I$(INCLUDES) $(DEFINES)
+CCFLAGS =  -g -march=armv7-a -mtune=cortex-a8 -mfpu=neon -mfloat-abi=hard -O0 -Wall -W -fPIE $(INCLUDES) $(DEFINES)
 LDFLAGS = -L../libs/lib -lsqlite3
 
 #CCFLAGS = -O0 -g -Wall
