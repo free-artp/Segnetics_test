@@ -1,4 +1,4 @@
-Простой пример _своего_ кода для контроллера Segnetics SMH4.
+# Простой пример _своего_ кода для контроллера Segnetics SMH4.
 
 Работает с программным ядром контроллера и через shared memory достает оттуда значения переменных. Работа со списком переменных не через load_files.srv, а через sqllite. Работает debug (за что и боролся с VScode). 
 
@@ -17,7 +17,7 @@
 4. F5 - старт дебуга.
 5. ... далее по мере способностей.
 
----------------- toolchain
+## toolchain
 
 Toolchain от linaro - https://www.linaro.org/downloads/  gcc-linaro-7.5.0-2019.12-x86_64_arm-linux-gnueabihf . У меня лежит в /opt/linaro и, чтобы иметь возможность комбинировать версии, сделаны симлинки:
     arm-linux-gnueabihf -> gcc-linaro-7.5.0-2019.12-x86_64_arm-linux-gnueabihf
@@ -29,17 +29,17 @@ Toolchain от linaro - https://www.linaro.org/downloads/  gcc-linaro-7.5.0-2019
 
 При работе в VSCode прописать во всех трех файлах, в каталоге .vscode правильные абсолютные пути до тулчайна.
 
----------------- сборка sqlite
+## сборка sqlite
 
 https://www.sqlite.org/download.html
-<code>
+```bash
 tar -xzvf sqlite-autoconf-3320300.tar.gz
 cd sqlite-autoconf-3320300/
 ./configure --host=arm-linux --prefix=/home/artp/Segnetics/libs CC=/opt/linaro/arm-linux-gnueabihf/bin/
 make
 ls -l .libs
 make install
-</code>
+```
 
 Здоровая критика приветствуется.
 
